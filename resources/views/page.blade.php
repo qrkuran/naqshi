@@ -907,35 +907,52 @@
         <img id="background" class="absolute -left-20 top-0 max-w-[877px]" src="https://laravel.com/assets/img/welcome/background.svg" />
         <div class="relative min-h-screen flex flex-col items-center justify-center selection:bg-[#FF2D20] selection:text-white">
             <div class="relative w-full max-w-2xl px-6 lg:max-w-7xl">
+
                 <main class="mt-6">
-                    <div class="grid gap-6 lg:grid-cols-2 lg:gap-8">
-                        <a href="{{ route('qr', ['type' => '1', 'number' => '001']) }}"
-                            class="flex items-center justify-center rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:h-[200px] dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
-                            <div class="text-center">
-                                <h2 class="text-xl font-semibold text-black dark:text-white">
-                                    {{ __('welcome.one_page') }}
-                                </h2>
+                    <div class="flex flex-col space-y-8">
+                        @foreach ($content as $item)
+                        <div style="margin-bottom: 30px;" class="audio-player flex flex-col items-center justify-center rounded-lg bg-white p-4 w-full max-w-md mx-auto shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
+                            <div class="flex items-center space-x-4">
+                                <img src="{{ $item['image'] }}" class="w-12 h-12 rounded-full">
+                                <audio id="audio1" controls class="w-full">
+                                    <source src="{{ $item['sound'] }}" type="audio/mpeg">
+                                    Tarayıcınız ses elementini desteklemiyor.
+                                </audio>
                             </div>
-                        </a>
-                        <a href="{{ route('qr', ['type' => '2', 'number' => '001']) }}"
-                            class="flex items-center justify-center rounded-lg bg-white p-6 shadow-[0px_14px_34px_0px_rgba(0,0,0,0.08)] ring-1 ring-white/[0.05] transition duration-300 hover:text-black/70 hover:ring-black/20 focus:outline-none focus-visible:ring-[#FF2D20] lg:h-[200px] dark:bg-zinc-900 dark:ring-zinc-800 dark:hover:text-white/70 dark:hover:ring-zinc-700 dark:focus-visible:ring-[#FF2D20]">
-                            <div class="text-center">
-                                <h2 class="text-xl font-semibold text-black dark:text-white">
-                                    {{ __('welcome.one_surah') }}
-                                </h2>
-                            </div>
-                        </a>
+                            <div class="progress-bar" style="width: 0%; height: 10px; background-color: #FF2D20; transition: width 0.1s;"></div>
+                        </div>
+                        @endforeach
                     </div>
                 </main>
 
-                <footer class="py-16 text-center text-sm text-black dark:text-white/70">
-                    <a href="https://mutlulukatolyem.com/i" target="_blank" style="display: none;">
-                        MutlulukAtolyem
-                    </a>
-                </footer>
             </div>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const audioPlayers = document.querySelectorAll('.audio-player');
+
+            audioPlayers.forEach(function(audioPlayer) {
+                const progressBar = audioPlayer.querySelector('.progress-bar');
+                const audio = audioPlayer.querySelector('audio');
+
+                audio.addEventListener('timeupdate', function() {
+                    const progress = (audio.currentTime / audio.duration) * 100;
+                    progressBar.style.width = `${progress}%`;
+                });
+
+                audioPlayer.addEventListener('click', function(event) {
+                    if (event.target !== audio && event.target !== audio.querySelector('source')) {
+                        if (audio.paused) {
+                            audio.play();
+                        } else {
+                            audio.pause();
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 </html>
