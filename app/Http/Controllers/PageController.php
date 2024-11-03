@@ -30,6 +30,7 @@ class PageController extends Controller
     private function getContent(string $type, string $number): array
     {
         $content = [];
+        $titleNum = $number;
 
         foreach ($this->supportedLangs as $lang) {
             $audioPath = match ($type) {
@@ -46,8 +47,14 @@ class PageController extends Controller
 
             $formattedLang = $lang === 'ra' ? 'RA' : strtolower($lang);
 
+            if($type === "1" && $formattedLang !== 'RA' && $formattedLang !== 'ru')
+            {
+                $newNumber = (int)$number - 1;
+                $number = str_pad($newNumber, 3, '0', STR_PAD_LEFT);
+            }
+
             $content[] = [
-                'title' => $this->findByTitle($lang, $type, $number),
+                'title' => $this->findByTitle($lang, $type, $titleNum),
                 'sound' => sprintf(
                     '%sassets/%s/%s_%s.mp3',
                     $this->baseUrl,

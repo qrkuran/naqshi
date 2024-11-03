@@ -29,7 +29,6 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
-            <!-- Menü öğeleri eklemek isterseniz buraya ekleyebilirsiniz -->
         </div>
     </div>
 </nav>
