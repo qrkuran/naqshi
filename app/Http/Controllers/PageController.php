@@ -21,7 +21,13 @@ class PageController extends Controller
 
     public function show()
     {
-        $content = [];
+        if ($this->type === '1') {
+            $number = intval($this->number);
+            $number--;
+
+            $this->number = str_pad($number, 3, '0', STR_PAD_LEFT);
+        }
+
         $content = $this->getContent($this->type, $this->number);
 
         return view('page', compact('content'));
@@ -46,12 +52,6 @@ class PageController extends Controller
             };
 
             $formattedLang = $lang === 'ra' ? 'RA' : strtolower($lang);
-
-            if($type === "1" && $formattedLang !== 'RA' && $formattedLang !== 'ru')
-            {
-                $newNumber = (int)$number - 1;
-                $number = str_pad($newNumber, 3, '0', STR_PAD_LEFT);
-            }
 
             $content[] = [
                 'title' => $this->findByTitle($lang, $type, $titleNum),
