@@ -8,39 +8,90 @@ class PageController extends Controller
 {
     private string $type;
     private string $number;
-    private array  $supportedLangs;
+    private array $supportedLangs;
     private string $baseUrl;
 
     public function __construct(Request $request)
     {
-        $this->type           = $request->type;
-        $this->number         = $request->number;
-        $this->supportedLangs = ['tr', 'ar'];
-        $this->baseUrl        = config('app.url');
+        $this->type = $request->type;
+        $this->number = str_pad($request->number, 3, '0', STR_PAD_LEFT);
+        $this->supportedLangs = ['ra', 'uz', 'ru']; // ra - Arabic, uz - Uzbek, ru - Russian
+        $this->baseUrl = "https://seslikurandinle.com/";
     }
 
     public function show()
     {
-        $content[] = [
-            'image' => 'https://seslikurandinle.com/assets/images/tr.png',
-            'sound' => 'https://seslikurandinle.com/assets/audio/as/001_FC.mp3'
-        ];
-        $content[] = [
-            'image' => 'https://seslikurandinle.com/assets/images/tr.png',
-            'sound' => 'https://seslikurandinle.com/assets/audio/as/001_FC.mp3'
-        ];
+        $content = [];
+        $content = $this->getContent($this->type, $this->number);
+
         return view('page', compact('content'));
     }
 
-    private function content(string $type, string $number): array
+    private function getContent(string $type, string $number): array
     {
         $content = [];
+
         foreach ($this->supportedLangs as $lang) {
+            $audioPath = match ($type) {
+                '1' => match (strtolower($lang)) {
+                    'ra' => 'audio/as',
+                    'ru', 'uz' => 'audio/ms',
+                },
+                '2' => match (strtolower($lang)) {
+                    'ra' => 'audio/asu',
+                    'ru', 'uz' => 'audio/msu',
+                },
+                default => throw new \InvalidArgumentException('Invalid type specified'),
+            };
+
+            $formattedLang = $lang === 'ra' ? 'RA' : strtolower($lang);
+
             $content[] = [
-                'image' => $this->baseUrl . '/assets/images/flags/' . $lang . '.png',
-                'sound' => $this->baseUrl . '/assets/files/' . $type . '/' . $number . '_' . $lang . '.mp3',
+                'title' => $this->findByTitle($lang, $type, $number),
+                'sound' => sprintf(
+                    '%sassets/%s/%s_%s.mp3',
+                    $this->baseUrl,
+                    $audioPath,
+                    $number,
+                    $formattedLang
+                ),
             ];
         }
         return $content;
+    }
+
+    private function findByTitle(string $lang, string $type, string $number): string
+    {
+        $translations = [
+            'ra' => [
+                'language' => 'عربي',
+                'page' => 'الصفحة',
+                'surah' => 'سورة'
+            ],
+            'uz' => [
+                'language' => 'uzbek',
+                'page' => 'Sahifa',
+                'surah' => 'Surah'
+            ],
+            'ru' => [
+                'language' => 'русский',
+                'page' => 'Страница',
+                'surah' => 'Сура'
+            ]
+        ];
+
+        $defaultLang = [
+            'language' => 'Unknown',
+            'page' => 'Page',
+            'surah' => 'Surah'
+        ];
+
+        $langData = $translations[$lang] ?? $defaultLang;
+
+        return match ($type) {
+            '1' => sprintf('%s - %s %s', $langData['language'], $langData['page'], $number),
+            '2' => sprintf('%s - %s %s', $langData['language'], $langData['surah'], $number),
+            default => $langData['language'],
+        };
     }
 }
